@@ -6,46 +6,32 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: "3.10"
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip python3-setuptools python3-wheel wget
+          sudo apt update
+          sudo apt install -y python3-pip zip unzip openjdk-17-jdk
+          pip install buildozer cython
 
-      - name: Install Android SDK
+      - name: Set up Android SDK
         run: |
           mkdir -p $HOME/android-sdk/cmdline-tools
           cd $HOME/android-sdk/cmdline-tools
-          wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O sdk-tools.zip
-          unzip -q sdk-tools.zip
-          mv cmdline-tools latest
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-9477386_latest.zip -d latest
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-
-      - name: Install Python dependencies
-        run: |
-          pip install --upgrade pip setuptools wheel
-          pip install buildozer cython virtualenv
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --licenses
+          sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
       - name: Build APK
-        env:
-          BUILDOZER_ALLOW_ROOT: "1"
-          ANDROID_HOME: ${{ runner.home }}/android-sdk
-          PATH: ${{ runner.home }}/android-sdk/platform-tools:${{ runner.home }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
         run: |
-          echo "Starting build..."
           buildozer android debug
-
-      - name: Upload APK
-        if: suc
