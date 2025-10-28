@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3-pip zip unzip openjdk-17-jdk wget git libc6 libncurses5 libstdc++6 zlib1g
+          sudo apt install -y python3-pip zip unzip openjdk-17-jdk wget git libncurses6 libstdc++6 zlib1g
           pip install --upgrade pip
           pip install buildozer cython
 
@@ -39,8 +39,8 @@ jobs:
         run: |
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/platform-tools:$PATH
-          which aidl || echo "AIDL not found, fixing..."
           if ! command -v aidl &> /dev/null; then
+            echo "AIDL not found, linking it..."
             sudo ln -s $ANDROID_HOME/build-tools/33.0.2/aidl /usr/local/bin/aidl || true
           fi
           aidl --version || echo "AIDL ready!"
@@ -51,12 +51,10 @@ jobs:
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/33.0.2:/usr/bin:$PATH
           REPO_OS_OVERRIDE: "linux"
         run: |
-          echo "Verifying environment..."
-          which git
+          echo "Checking tools..."
           git --version
-          which aidl
-          aidl --version || echo "AIDL OK"
-          echo "Starting Buildozer build..."
+          aidl --version || echo "AIDL working"
+          echo "Building APK now..."
           buildozer -v android debug
 
       - name: Upload APK
