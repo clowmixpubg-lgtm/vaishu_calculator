@@ -14,12 +14,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'   # <-- using 3.11 instead of 3.12 for better compatibility
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk aidl
+          sudo apt-get install -y git zip unzip openjdk-17-jdk aidl python3-distutils
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
