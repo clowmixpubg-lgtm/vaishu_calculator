@@ -1,26 +1,37 @@
 name: Build APK
-on: [workflow_dispatch]
+
+on:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          sudo apt update
+          sudo apt update -y
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip
           pip install --upgrade pip
           pip install buildozer cython virtualenv
+
+      - name: Debug - show files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "List of files:"
+          ls -R
+
+      - name: Build APK
+        run: |
           export BUILDOZER_ALLOW_ROOT=1
-          buildozer -v android debug
+          buildozer android debug
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-
-        with:
-          name: vaishu-calculator-apk
-          path: bin/*.apk
