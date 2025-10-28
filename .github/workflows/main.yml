@@ -19,7 +19,8 @@ jobs:
           buildozer -v android debug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
+
         with:
           name: vaishu-calculator-apk
           path: bin/*.apk
