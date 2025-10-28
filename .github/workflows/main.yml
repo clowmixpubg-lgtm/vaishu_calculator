@@ -16,10 +16,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk aidl
+          sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip python3-setuptools python3-wheel wget
+
+          # Install Android SDK commandline tools (for aidl)
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
+          unzip sdk-tools.zip -d latest
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+
+          yes | sdkmanager --licenses
+          yes | sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+
+      - name: Install Python dependencies
+        run: |
           python -m ensurepip --upgrade
           pip install --upgrade pip setuptools wheel
           pip install buildozer cython virtualenv
@@ -27,5 +41,7 @@ jobs:
       - name: Build APK
         env:
           BUILDOZER_ALLOW_ROOT: "1"
+          ANDROID_HOME: ${{ runner.temp }}/android-sdk
+          PATH: ${{ runner.temp }}/android-sdk/platform-tools:${{ runner.temp }}/android-sdk/cmdline-tools/latest/bin:${{ env.PATH }}
         run: |
-          buildozer android debug
+          buildozer androi
