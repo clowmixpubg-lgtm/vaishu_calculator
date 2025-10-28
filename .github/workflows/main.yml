@@ -24,12 +24,11 @@ jobs:
 
       - name: Set up Android SDK
         run: |
-          mkdir -p $HOME/android-sdk
-          cd $HOME/android-sdk
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          cd $HOME/android-sdk/cmdline-tools
           wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
           unzip -q cmdline-tools.zip
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/* cmdline-tools/latest/
+          mv cmdline-tools latest
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
@@ -39,7 +38,7 @@ jobs:
         env:
           ANDROID_HOME: $HOME/android-sdk
           PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$PATH
-          REPO_OS_OVERRIDE: "linux"   # ✅ Fixes your OS error
+          REPO_OS_OVERRIDE: "linux"
         run: |
           buildozer -v android debug
 
