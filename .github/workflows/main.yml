@@ -31,3 +31,42 @@ jobs:
           unzip -q cmdline-tools.zip
           mv cmdline-tools latest
           export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" "cmdline-tools;latest" "extras;android;m2repository" "extras;google;m2repository"
+
+      - name: Verify AIDL
+        run: |
+          export ANDROID_HOME=$HOME/android-sdk
+          export PATH=$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/platform-tools:$PATH
+          if ! command -v aidl &> /dev/null; then
+            echo "AIDL not found, linking it..."
+            sudo ln -s $ANDROID_HOME/build-tools/33.0.2/aidl /usr/local/bin/aidl || true
+          fi
+          aidl --version || echo "AIDL ready!"
+
+      - name: Build APK
+        env:
+          ANDROID_HOME: $HOME/android-sdk
+          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/33.0.2:/usr/bin:$PATH
+          REPO_OS_OVERRIDE: "linux"
+        run: |
+          echo "Checking tools..."
+          git --version
+          aidl --version || echo "AIDL working"
+          echo "Building APK now..."
+          buildozer -v android debug
+
+      - name: List possible APK files
+        run: |
+          echo "Searching for APKs..."
+          find . -type f -name "*.apk" || echo "No APK found"
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vaishu-Calculator-APK
+          path: |
+            bin/*.apk
+            .buildozer/android/platform/build-armeabi-v7a/dists/**/bin/*.apk
