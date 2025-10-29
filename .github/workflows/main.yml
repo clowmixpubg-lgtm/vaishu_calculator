@@ -33,22 +33,29 @@ jobs:
           export ANDROID_HOME=$HOME/android-sdk
           export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-33" "build-tools;33.0.2" "cmdline-tools;latest" "extras;android;m2repository" "extras;google;m2repository"
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "cmdline-tools;latest" \
+            "extras;android;m2repository" \
+            "extras;google;m2repository"
 
       - name: Verify AIDL
         run: |
           export ANDROID_HOME=$HOME/android-sdk
-          export PATH=$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/platform-tools:$PATH
+          export PATH=$ANDROID_HOME/build-tools/34.0.0:$ANDROID_HOME/platform-tools:$PATH
           if ! command -v aidl &> /dev/null; then
             echo "AIDL not found, linking it..."
-            sudo ln -s $ANDROID_HOME/build-tools/33.0.2/aidl /usr/local/bin/aidl || true
+            sudo ln -s $ANDROID_HOME/build-tools/34.0.0/aidl /usr/local/bin/aidl || true
           fi
+          echo "AIDL found at: $(which aidl)"
           aidl --version || echo "AIDL ready!"
 
       - name: Build APK
         env:
           ANDROID_HOME: $HOME/android-sdk
-          PATH: $HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools:$HOME/android-sdk/build-tools/33.0.2:/usr/bin:$PATH
+          PATH: $HOME/android-sdk/build-tools/34.0.0:$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/latest/bin:$PATH
           REPO_OS_OVERRIDE: "linux"
         run: |
           echo "Checking tools..."
